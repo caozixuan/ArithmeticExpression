@@ -70,9 +70,24 @@ public class Parser {
 
     public TokenInformation isIndentifier() throws Exception{
         readNextChar();
+        char c = chars[curIndex];
+        while(curIndex<chars.length&&('a'<c&&c<'z')||('0'<c&&c<'9')||('A'<c&&c<'Z')||c=='_'||c=='$'){
+            readNextChar();
+            c = chars[curIndex];
+        }
+
+        readNextChar();
         return null;
     }
 
+    public String getString(int start, int end){
+        char[] chars_part = new char[end-start];
+        for(int i=0;i<=end-start;i++){
+            chars_part[i]=chars[start+i];
+        }
+        String s = String.copyValueOf(chars_part);
+        return s;
+    }
     public TokenInformation isOperator() throws Exception{
         readNextChar();
         return null;
