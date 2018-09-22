@@ -75,9 +75,10 @@ public class Parser {
             readNextChar();
             c = chars[curIndex];
         }
-
-        readNextChar();
-        return null;
+        String information = getString(lastIndex+1,curIndex-1);
+        TokenInformation tokenInformation = new TokenInformation(TokenType.IDENTIFIER, information);
+        lastIndex = curIndex-1;
+        return tokenInformation;
     }
 
     public String getString(int start, int end){
@@ -89,7 +90,23 @@ public class Parser {
         return s;
     }
     public TokenInformation isOperator() throws Exception{
+        TokenInformation tokenInformation = null;
+        char c = chars[curIndex];
+        switch (c){
+            case '+':
+                tokenInformation = new TokenInformation(TokenType.PLUS,null);
+                break;
+            case '-':
+                tokenInformation = new TokenInformation(TokenType.MINUS,null);
+                break;
+            case '*':
+                tokenInformation = new TokenInformation(TokenType.MULTIPLE,null);
+                break;
+            case '/':
+                tokenInformation = new TokenInformation(TokenType.DIVIDE,null);
+                break;
+        }
         readNextChar();
-        return null;
+        return tokenInformation;
     }
 }
