@@ -65,7 +65,51 @@ public class Parser {
 
     public TokenInformation isIntegerOrDouble() throws Exception{
         readNextChar();   //规定：读取下一个字符的过程在函数中进行而不是在parser中进行
-        return null;
+        char c = chars[curIndex];
+        boolean isNegative = false;   // 可能不需要
+        boolean isDouble = false;
+        if (c == '-') {
+            isNegative = true;
+            readNextChar();
+            c = chars[curIndex];
+        }
+        if ('0' < c && c <= '9') {
+            readNextChar();
+            c = chars[curIndex];
+            int dotCount = 0;
+            while (curIndex < chars.length && (('1' <= c && c <= '9') || c == '.')) {
+                if (c == '.' && dotCount > 1) {
+                    throw Exception;   // 错误：两个小数点
+                }
+                else if (c == '.') {
+                    dotCount++;
+                    isDouble = true;
+                    readNextChar();
+                    if (curIndex < chars.length)
+                        c = chars[curIndex];
+                }
+                else {
+                    readNextChar();
+                    if (curIndex < chars.length)
+                        c = chars[curIndex];
+                }
+            }
+            if (('a' <= c && c <= 'z') || ('A'<= c && c <= 'Z')) {
+                // 注意：这里只考虑了数字里面不能存在字母的情况，其他特殊情况之后按需添加。
+                throw Exception;
+            }
+            String information = getString(lastIndex+1,curIndex-1);
+            if (isDouble)
+                TokenInformation tokenInformation = new TokenInformation(TokenType.DOUBLE, information);
+            else
+                TokenInformation tokenInformation = new TokenInformation(TokenType.INT, information);
+
+            lastIndex = curIndex-1;
+            return tokenInformation;
+        }
+        else
+            throw Exception;
+        // 注：此处未处理4.2000000000的情况，之后按需添加。
     }
 
     public TokenInformation isIndentifier() throws Exception{
