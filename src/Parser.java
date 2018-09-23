@@ -21,6 +21,13 @@ class TokenInformation{
         this.type = type;
         this.information = information;
     }
+
+    @Override
+    public String toString(){
+        String result = "";
+        result=result+" type:"+type+" information:"+information+" ";
+        return result;
+    }
 }
 
 
@@ -35,19 +42,25 @@ public class Parser {
         this.chars = sentence.toCharArray();
     }
 
-    public void readNextChar(){
-        curIndex++;
+    public boolean readNextChar(){
+        if(curIndex<chars.length){
+            curIndex++;
+            if(curIndex==chars.length)
+                return false;
+            return true;
+        }
+        return false;
     }
 
-    public ArrayList<TokenInformation> parser(String sentence) throws Exception{
+    public ArrayList<TokenInformation> parser() throws Exception{
         ArrayList<TokenInformation> tokenInformations = new ArrayList<>();
         while(curIndex<chars.length){
             char c = chars[curIndex];
-            if(('a'<c&&c<'z')||('A'<c&&c<'Z')||c=='_'||c=='$'){
+            if(('a'<=c&&c<='z')||('A'<=c&&c<='Z')||c=='_'||c=='$'){
                 TokenInformation tokenInformation = isIndentifier();
                 tokenInformations.add(tokenInformation);
             }
-            else if(('0'<c&&c<'9')||c=='-'){
+            else if(('0'<=c&&c<='9')||c=='-'){
                 //如果为-，可能返回一个operator
                 TokenInformation tokenInformation = isIntegerOrDouble();
                 tokenInformations.add(tokenInformation);
@@ -64,22 +77,23 @@ public class Parser {
     }
 
     public TokenInformation isIntegerOrDouble() throws Exception{
-        readNextChar();   //规定：读取下一个字符的过程在函数中进行而不是在parser中进行
+        //readNextChar();   //规定：读取下一个字符的过程在函数中进行而不是在parser中进行
         char c = chars[curIndex];
         boolean isNegative = false;   // 可能不需要
         boolean isDouble = false;
+        TokenInformation tokenInformation = null;
         if (c == '-') {
             isNegative = true;
             readNextChar();
             c = chars[curIndex];
         }
-        if ('0' < c && c <= '9') {
+        if ('0' <= c && c <= '9') {
             readNextChar();
             c = chars[curIndex];
             int dotCount = 0;
             while (curIndex < chars.length && (('1' <= c && c <= '9') || c == '.')) {
                 if (c == '.' && dotCount > 1) {
-                    throw Exception;   // 错误：两个小数点
+                    throw new Exception("两个小数点");   // 错误：两个小数点
                 }
                 else if (c == '.') {
                     dotCount++;
@@ -96,27 +110,35 @@ public class Parser {
             }
             if (('a' <= c && c <= 'z') || ('A'<= c && c <= 'Z')) {
                 // 注意：这里只考虑了数字里面不能存在字母的情况，其他特殊情况之后按需添加。
-                throw Exception;
+                throw new Exception();
             }
             String information = getString(lastIndex+1,curIndex-1);
             if (isDouble)
-                TokenInformation tokenInformation = new TokenInformation(TokenType.DOUBLE, information);
+                tokenInformation = new TokenInformation(TokenType.DOUBLE, information);
             else
-                TokenInformation tokenInformation = new TokenInformation(TokenType.INT, information);
+                tokenInformation = new TokenInformation(TokenType.INT, information);
 
             lastIndex = curIndex-1;
             return tokenInformation;
         }
         else
-            throw Exception;
+            throw new Exception();
         // 注：此处未处理4.2000000000的情况，之后按需添加。
     }
 
     public TokenInformation isIndentifier() throws Exception{
-        readNextChar();
+        if(!readNextChar()){
+            String information = getString(lastIndex+1,curIndex-1);
+            TokenInformation tokenInformation = new TokenInformation(TokenType.IDENTIFIER, information);
+            return tokenInformation;
+        }
         char c = chars[curIndex];
-        while(curIndex<chars.length&&('a'<c&&c<'z')||('0'<c&&c<'9')||('A'<c&&c<'Z')||c=='_'||c=='$'){
-            readNextChar();
+        while(curIndex<chars.length&&('a'<=c&&c<='z')||('0'<=c&&c<='9')||('A'<=c&&c<='Z')||c=='_'||c=='$'){
+            if(!readNextChar()){
+                String information = getString(lastIndex+1,curIndex-1);
+                TokenInformation tokenInformation = new TokenInformation(TokenType.IDENTIFIER, information);
+                return tokenInformation;
+            }
             c = chars[curIndex];
         }
         String information = getString(lastIndex+1,curIndex-1);
@@ -126,7 +148,7 @@ public class Parser {
     }
 
     public String getString(int start, int end){
-        char[] chars_part = new char[end-start];
+        char[] chars_part = new char[end-start+1];
         for(int i=0;i<=end-start;i++){
             chars_part[i]=chars[start+i];
         }
@@ -149,7 +171,14 @@ public class Parser {
             case '/':
                 tokenInformation = new TokenInformation(TokenType.DIVIDE,null);
                 break;
+            case '(':
+                tokenInformation = new TokenInformation(TokenType.LEFTBRACKET,null);
+                break;
+            case ')':
+                tokenInformation = new TokenInformation(TokenType.RIGHTBRACKET,null);
+                break;
         }
+        lastIndex = curIndex;
         readNextChar();
         return tokenInformation;
     }
