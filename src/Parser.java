@@ -88,6 +88,14 @@ public class Parser {
             c = chars[curIndex];
         }
         if ('0' <= c && c <= '9') {
+            if (c == '0') {
+                readNextChar();
+                c = chars[curIndex];
+                if (c == '.')
+                    curIndex--;
+                else
+                    throw new Exception;
+            }
             readNextChar();
             c = chars[curIndex];
             int dotCount = 0;
