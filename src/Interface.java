@@ -1,40 +1,35 @@
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 
 public class Interface extends JFrame implements ActionListener
 {
+
     JButton parser = new JButton("分词");
     JLabel  sentence = new JLabel("表达式：");
     JLabel result = new JLabel("结果：");
     JTextField JSentence= new JTextField(10);
     JTextField JResult= new JTextField(10);
-
+    JTextArea  ParserResult = new JTextArea(4,20);
     public Interface()
     {
         JPanel jp = new JPanel();
-        jp.setLayout(new GridLayout(3,2));  //3行2列的面板jp（网格布局）
+        jp.setLayout(new FlowLayout(1));
+        //jp.setLayout(new GridLayout(3,2));  //3行2列的面板jp（网格布局）
 
         sentence.setHorizontalAlignment(SwingConstants.RIGHT);  //设置该组件的对齐方式为向右对齐
         result.setHorizontalAlignment(SwingConstants.RIGHT);
 
-
         jp.add(sentence);
-        jp.add(result);
         jp.add(JSentence);
+        jp.add(result);
         jp.add(JResult);
         jp.add(parser);
+        jp.add(ParserResult);
+
         parser.addActionListener(this);
 
         this.add(jp,BorderLayout.CENTER);	//将整块面板定义在中间
@@ -45,7 +40,7 @@ public class Interface extends JFrame implements ActionListener
         this.setVisible(true);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
-    public void actionPerformed(ActionEvent e)  
+    public void actionPerformed(ActionEvent e)
     {
 
             String sentence = JSentence.getText();
@@ -60,6 +55,7 @@ public class Interface extends JFrame implements ActionListener
             for(TokenInformation tokenInformation:tokenInformations){
                 result+=tokenInformation.toString();
             }
+            ParserResult.setText(result);
             JResult.setText(result);
     }
     public static void main(String[] args)

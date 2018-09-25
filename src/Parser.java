@@ -94,9 +94,16 @@ public class Parser {
                 if (c == '.')
                     curIndex--;
                 else
-                    throw new Exception;
+                    throw new Exception();
             }
-            readNextChar();
+            if(!readNextChar()){
+                String information = getString(lastIndex+1,curIndex-1);
+                if (isDouble)
+                    tokenInformation = new TokenInformation(TokenType.DOUBLE, information);
+                else
+                    tokenInformation = new TokenInformation(TokenType.INT, information);
+                return tokenInformation;
+            }
             c = chars[curIndex];
             int dotCount = 0;
             while (curIndex < chars.length && (('1' <= c && c <= '9') || c == '.')) {
