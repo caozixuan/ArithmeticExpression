@@ -60,12 +60,12 @@ public class Parser {
                 TokenInformation tokenInformation = isIndentifier();
                 tokenInformations.add(tokenInformation);
             }
-            else if(('0'<=c&&c<='9')||c=='-'){
+            else if('0'<=c&&c<='9'){
                 //如果为-，可能返回一个operator
                 TokenInformation tokenInformation = isIntegerOrDouble();
                 tokenInformations.add(tokenInformation);
             }
-            else if(c=='+'||c=='*'||c=='/'||c=='('||c==')'){
+            else if(c=='+'||c=='-'||c=='*'||c=='/'||c=='('||c==')'){
                 TokenInformation tokenInformation = isOperator();
                 tokenInformations.add(tokenInformation);
             }
@@ -82,19 +82,22 @@ public class Parser {
         boolean isNegative = false;   // 可能不需要
         boolean isDouble = false;
         TokenInformation tokenInformation = null;
-        if (c == '-') {
-            isNegative = true;
-            readNextChar();
-            c = chars[curIndex];
-        }
+
         if ('0' <= c && c <= '9') {
             if (c == '0') {
-                readNextChar();
-                c = chars[curIndex];
-                if (c == '.')
-                    curIndex--;
-                else
-                    throw new Exception();
+                if (readNextChar()) {
+                    c = chars[curIndex];
+                    if (c == '.')
+                        curIndex--;
+                    else {
+                        tokenInformation = new TokenInformation(TokenType.INT, "0");
+                        return tokenInformation;
+                    }
+                }
+                else {
+                    tokenInformation = new TokenInformation(TokenType.INT, "0");
+                    return tokenInformation;
+                }
             }
             if(!readNextChar()){
                 String information = getString(lastIndex+1,curIndex-1);
@@ -104,10 +107,12 @@ public class Parser {
                     tokenInformation = new TokenInformation(TokenType.INT, information);
                 return tokenInformation;
             }
+            else
+                curIndex--;
             c = chars[curIndex];
             int dotCount = 0;
-            while (curIndex < chars.length && (('1' <= c && c <= '9') || c == '.')) {
-                if (c == '.' && dotCount > 1) {
+            while (curIndex < chars.length && (('0' <= c && c <= '9') || c == '.')) {
+                if (c == '.' && dotCount > 0) {
                     throw new Exception("两个小数点");   // 错误：两个小数点
                 }
                 else if (c == '.') {
@@ -123,7 +128,7 @@ public class Parser {
                         c = chars[curIndex];
                 }
             }
-            if (('a' <= c && c <= 'z') || ('A'<= c && c <= 'Z')) {
+            if (('a' <= c && c <= 'z') || ('A'<= c && c <= 'Z') || c == '_') {
                 // 注意：这里只考虑了数字里面不能存在字母的情况，其他特殊情况之后按需添加。
                 throw new Exception();
             }
