@@ -45,10 +45,10 @@ public class Interface extends JFrame implements ActionListener
     {
 
             String sentence = JSentence.getText();
-            Parser parser = new Parser(0,-1,sentence);
+            Lexer lexer = new Lexer(0,-1,sentence);
             ArrayList<TokenInformation> tokenInformations = null;
             try{
-                tokenInformations = parser.parser();
+                tokenInformations = lexer.parser();
                 String result = "";
                 for(TokenInformation tokenInformation:tokenInformations){
                     result+=tokenInformation.toString();
