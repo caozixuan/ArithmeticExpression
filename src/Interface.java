@@ -10,23 +10,24 @@ public class Interface extends JFrame implements ActionListener
 
     JButton parser = new JButton("分词");
     JLabel  sentence = new JLabel("表达式：");
-    JLabel result = new JLabel("结果：");
+    //JLabel result = new JLabel("结果：");
     JTextField JSentence= new JTextField(10);
-    JTextField JResult= new JTextField(10);
+    //JTextField JResult= new JTextField(10);
     JTextArea  ParserResult = new JTextArea(4,20);
     public Interface()
     {
         JPanel jp = new JPanel();
-        jp.setLayout(new FlowLayout(1));
+        jp.setLayout(new FlowLayout(FlowLayout.CENTER));
         //jp.setLayout(new GridLayout(3,2));  //3行2列的面板jp（网格布局）
-
+        ParserResult.setLineWrap(true);
+        ParserResult.setWrapStyleWord(true);
         sentence.setHorizontalAlignment(SwingConstants.RIGHT);  //设置该组件的对齐方式为向右对齐
-        result.setHorizontalAlignment(SwingConstants.RIGHT);
+        //result.setHorizontalAlignment(SwingConstants.RIGHT);
 
         jp.add(sentence);
         jp.add(JSentence);
-        jp.add(result);
-        jp.add(JResult);
+        //jp.add(result);
+        //jp.add(JResult);
         jp.add(parser);
         jp.add(ParserResult);
 
@@ -48,15 +49,16 @@ public class Interface extends JFrame implements ActionListener
             ArrayList<TokenInformation> tokenInformations = null;
             try{
                 tokenInformations = parser.parser();
-            }catch (Exception e1){
+                String result = "";
+                for(TokenInformation tokenInformation:tokenInformations){
+                    result+=tokenInformation.toString();
+                }
+                ParserResult.setText(result);
+                //JResult.setText(result);
+            }catch (Exception e1) {
                 e1.printStackTrace();
+                ParserResult.setText(e1.getMessage());
             }
-            String result = "";
-            for(TokenInformation tokenInformation:tokenInformations){
-                result+=tokenInformation.toString();
-            }
-            ParserResult.setText(result);
-            JResult.setText(result);
     }
     public static void main(String[] args)
     {

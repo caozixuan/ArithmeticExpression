@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-enum TokenType{
+enum TokenType {
     INT,           //整数
     DOUBLE,          //浮点数
     IDENTIFIER,   //标识符
@@ -13,7 +13,7 @@ enum TokenType{
     ERROR         //报错
 }
 
-class TokenInformation{
+class TokenInformation {
     TokenType type;                    //记录token类型
     String information;               //记录token的具体信息比如一个double值为2.55
 
@@ -23,9 +23,9 @@ class TokenInformation{
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         String result = "";
-        result=result+" type:"+type+" information:"+information+" ";
+        result = result + " type:" + type + " information:" + information + " "+"\n";
         return result;
     }
 }
@@ -39,47 +39,44 @@ public class Parser {
     public Parser(int curIndex, int lastIndex, String sentence) {
         this.curIndex = curIndex;
         this.lastIndex = lastIndex;
-        this.chars = sentence.toCharArray();
+        String str = sentence.replaceAll(" ", "");
+        this.chars = str.toCharArray();
     }
 
-    public boolean readNextChar(){
-        if(curIndex<chars.length){
+    public boolean readNextChar() {
+        if (curIndex < chars.length) {
             curIndex++;
-            if(curIndex==chars.length)
+            if (curIndex == chars.length)
                 return false;
             return true;
         }
         return false;
     }
 
-    public ArrayList<TokenInformation> parser() throws Exception{
+    public ArrayList<TokenInformation> parser() throws Exception {
         ArrayList<TokenInformation> tokenInformations = new ArrayList<>();
-        while(curIndex<chars.length){
+        while (curIndex < chars.length) {
             char c = chars[curIndex];
-            if(('a'<=c&&c<='z')||('A'<=c&&c<='Z')||c=='_'||c=='$'){
+            if (('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_' || c == '$') {
                 TokenInformation tokenInformation = isIndentifier();
                 tokenInformations.add(tokenInformation);
-            }
-            else if('0'<=c&&c<='9'){
+            } else if ('0' <= c && c <= '9') {
                 //如果为-，可能返回一个operator
                 TokenInformation tokenInformation = isIntegerOrDouble();
                 tokenInformations.add(tokenInformation);
-            }
-            else if(c=='+'||c=='-'||c=='*'||c=='/'||c=='('||c==')'){
+            } else if (c == '+' || c == '-' || c == '*' || c == '/' || c == '(' || c == ')') {
                 TokenInformation tokenInformation = isOperator();
                 tokenInformations.add(tokenInformation);
-            }
-            else{
-                throw new Exception("unknown error");
+            } else {
+                throw new Exception("invalid character");
             }
         }
         return tokenInformations;
     }
 
-    public TokenInformation isIntegerOrDouble() throws Exception{
+    public TokenInformation isIntegerOrDouble() throws Exception {
         //readNextChar();   //规定：读取下一个字符的过程在函数中进行而不是在parser中进行
         char c = chars[curIndex];
-        boolean isNegative = false;   // 可能不需要
         boolean isDouble = false;
         TokenInformation tokenInformation = null;
 
@@ -89,113 +86,110 @@ public class Parser {
                     c = chars[curIndex];
                     if (c == '.')
                         curIndex--;
+                    else if ('0' <= c && c <= '9') {
+                        throw new Exception("invalid expression of numbers");
+                    }
                     else {
                         tokenInformation = new TokenInformation(TokenType.INT, "0");
                         return tokenInformation;
                     }
-                }
-                else {
+                } else {
                     tokenInformation = new TokenInformation(TokenType.INT, "0");
                     return tokenInformation;
                 }
             }
-            if(!readNextChar()){
-                String information = getString(lastIndex+1,curIndex-1);
+            if (!readNextChar()) {
+                String information = getString(lastIndex + 1, curIndex - 1);
                 if (isDouble)
                     tokenInformation = new TokenInformation(TokenType.DOUBLE, information);
                 else
                     tokenInformation = new TokenInformation(TokenType.INT, information);
                 return tokenInformation;
-            }
-            else
+            } else
                 curIndex--;
             c = chars[curIndex];
             int dotCount = 0;
             while (curIndex < chars.length && (('0' <= c && c <= '9') || c == '.')) {
                 if (c == '.' && dotCount > 0) {
-                    throw new Exception("两个小数点");   // 错误：两个小数点
-                }
-                else if (c == '.') {
+                    throw new Exception("more than one dots");   // 错误：两个小数点
+                } else if (c == '.') {
                     dotCount++;
                     isDouble = true;
                     readNextChar();
                     if (curIndex < chars.length)
                         c = chars[curIndex];
-                }
-                else {
+                } else {
                     readNextChar();
                     if (curIndex < chars.length)
                         c = chars[curIndex];
                 }
             }
-            if (('a' <= c && c <= 'z') || ('A'<= c && c <= 'Z') || c == '_') {
-                // 注意：这里只考虑了数字里面不能存在字母的情况，其他特殊情况之后按需添加。
-                throw new Exception();
+            if (('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_') {
+                throw new Exception("invalid expression of numbers");
             }
-            String information = getString(lastIndex+1,curIndex-1);
+            String information = getString(lastIndex + 1, curIndex - 1);
             if (isDouble)
                 tokenInformation = new TokenInformation(TokenType.DOUBLE, information);
             else
                 tokenInformation = new TokenInformation(TokenType.INT, information);
 
-            lastIndex = curIndex-1;
+            lastIndex = curIndex - 1;
             return tokenInformation;
-        }
-        else
-            throw new Exception();
-        // 注：此处未处理4.2000000000的情况，之后按需添加。
+        } else
+            throw new Exception("unknown error");
     }
 
-    public TokenInformation isIndentifier() throws Exception{
-        if(!readNextChar()){
-            String information = getString(lastIndex+1,curIndex-1);
+    public TokenInformation isIndentifier() throws Exception {
+        if (!readNextChar()) {
+            String information = getString(lastIndex + 1, curIndex - 1);
             TokenInformation tokenInformation = new TokenInformation(TokenType.IDENTIFIER, information);
             return tokenInformation;
         }
         char c = chars[curIndex];
-        while(curIndex<chars.length&&('a'<=c&&c<='z')||('0'<=c&&c<='9')||('A'<=c&&c<='Z')||c=='_'||c=='$'){
-            if(!readNextChar()){
-                String information = getString(lastIndex+1,curIndex-1);
+        while (curIndex < chars.length && ('a' <= c && c <= 'z') || ('0' <= c && c <= '9') || ('A' <= c && c <= 'Z') || c == '_' || c == '$') {
+            if (!readNextChar()) {
+                String information = getString(lastIndex + 1, curIndex - 1);
                 TokenInformation tokenInformation = new TokenInformation(TokenType.IDENTIFIER, information);
                 return tokenInformation;
             }
             c = chars[curIndex];
         }
-        String information = getString(lastIndex+1,curIndex-1);
+        String information = getString(lastIndex + 1, curIndex - 1);
         TokenInformation tokenInformation = new TokenInformation(TokenType.IDENTIFIER, information);
-        lastIndex = curIndex-1;
+        lastIndex = curIndex - 1;
         return tokenInformation;
     }
 
-    public String getString(int start, int end){
-        char[] chars_part = new char[end-start+1];
-        for(int i=0;i<=end-start;i++){
-            chars_part[i]=chars[start+i];
+    public String getString(int start, int end) {
+        char[] chars_part = new char[end - start + 1];
+        for (int i = 0; i <= end - start; i++) {
+            chars_part[i] = chars[start + i];
         }
         String s = String.copyValueOf(chars_part);
         return s;
     }
-    public TokenInformation isOperator() throws Exception{
+
+    public TokenInformation isOperator() throws Exception {
         TokenInformation tokenInformation = null;
         char c = chars[curIndex];
-        switch (c){
+        switch (c) {
             case '+':
-                tokenInformation = new TokenInformation(TokenType.PLUS,null);
+                tokenInformation = new TokenInformation(TokenType.PLUS, null);
                 break;
             case '-':
-                tokenInformation = new TokenInformation(TokenType.MINUS,null);
+                tokenInformation = new TokenInformation(TokenType.MINUS, null);
                 break;
             case '*':
-                tokenInformation = new TokenInformation(TokenType.MULTIPLE,null);
+                tokenInformation = new TokenInformation(TokenType.MULTIPLE, null);
                 break;
             case '/':
-                tokenInformation = new TokenInformation(TokenType.DIVIDE,null);
+                tokenInformation = new TokenInformation(TokenType.DIVIDE, null);
                 break;
             case '(':
-                tokenInformation = new TokenInformation(TokenType.LEFTBRACKET,null);
+                tokenInformation = new TokenInformation(TokenType.LEFTBRACKET, null);
                 break;
             case ')':
-                tokenInformation = new TokenInformation(TokenType.RIGHTBRACKET,null);
+                tokenInformation = new TokenInformation(TokenType.RIGHTBRACKET, null);
                 break;
         }
         lastIndex = curIndex;
