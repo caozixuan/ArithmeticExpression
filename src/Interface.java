@@ -59,6 +59,8 @@ public class Interface extends JFrame implements ActionListener
                 e1.printStackTrace();
                 ParserResult.setText(e1.getMessage());
             }
+            Parser parser = new Parser(tokenInformations);
+            System.out.println(parser.parser());
     }
     public static void main(String[] args)
     {
