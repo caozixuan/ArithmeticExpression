@@ -16,10 +16,12 @@ enum TokenType {
 class TokenInformation {
     TokenType type;                    //记录token类型
     String information;               //记录token的具体信息比如一个double值为2.55
+    int index;                        // Index of current token
 
-    public TokenInformation(TokenType type, String information) {
+    public TokenInformation(TokenType type, String information, int index) {
         this.type = type;
         this.information = information;
+        this.index = index;
     }
 
     @Override
@@ -90,20 +92,20 @@ public class Lexer {
                         throw new Exception("invalid expression of numbers");
                     }
                     else {
-                        tokenInformation = new TokenInformation(TokenType.INT, "0");
+                        tokenInformation = new TokenInformation(TokenType.INT, "0", curIndex);
                         return tokenInformation;
                     }
                 } else {
-                    tokenInformation = new TokenInformation(TokenType.INT, "0");
+                    tokenInformation = new TokenInformation(TokenType.INT, "0", curIndex);
                     return tokenInformation;
                 }
             }
             if (!readNextChar()) {
                 String information = getString(lastIndex + 1, curIndex - 1);
                 if (isDouble)
-                    tokenInformation = new TokenInformation(TokenType.DOUBLE, information);
+                    tokenInformation = new TokenInformation(TokenType.DOUBLE, information, curIndex);
                 else
-                    tokenInformation = new TokenInformation(TokenType.INT, information);
+                    tokenInformation = new TokenInformation(TokenType.INT, information, curIndex);
                 return tokenInformation;
             } else
                 curIndex--;
@@ -129,9 +131,9 @@ public class Lexer {
             }
             String information = getString(lastIndex + 1, curIndex - 1);
             if (isDouble)
-                tokenInformation = new TokenInformation(TokenType.DOUBLE, information);
+                tokenInformation = new TokenInformation(TokenType.DOUBLE, information, curIndex);
             else
-                tokenInformation = new TokenInformation(TokenType.INT, information);
+                tokenInformation = new TokenInformation(TokenType.INT, information, curIndex);
 
             lastIndex = curIndex - 1;
             return tokenInformation;
@@ -142,20 +144,20 @@ public class Lexer {
     public TokenInformation isIndentifier() throws Exception {
         if (!readNextChar()) {
             String information = getString(lastIndex + 1, curIndex - 1);
-            TokenInformation tokenInformation = new TokenInformation(TokenType.IDENTIFIER, information);
+            TokenInformation tokenInformation = new TokenInformation(TokenType.IDENTIFIER, information, curIndex);
             return tokenInformation;
         }
         char c = chars[curIndex];
         while (curIndex < chars.length && ('a' <= c && c <= 'z') || ('0' <= c && c <= '9') || ('A' <= c && c <= 'Z') || c == '_' || c == '$') {
             if (!readNextChar()) {
                 String information = getString(lastIndex + 1, curIndex - 1);
-                TokenInformation tokenInformation = new TokenInformation(TokenType.IDENTIFIER, information);
+                TokenInformation tokenInformation = new TokenInformation(TokenType.IDENTIFIER, information, curIndex);
                 return tokenInformation;
             }
             c = chars[curIndex];
         }
         String information = getString(lastIndex + 1, curIndex - 1);
-        TokenInformation tokenInformation = new TokenInformation(TokenType.IDENTIFIER, information);
+        TokenInformation tokenInformation = new TokenInformation(TokenType.IDENTIFIER, information, curIndex);
         lastIndex = curIndex - 1;
         return tokenInformation;
     }
@@ -174,22 +176,22 @@ public class Lexer {
         char c = chars[curIndex];
         switch (c) {
             case '+':
-                tokenInformation = new TokenInformation(TokenType.PLUS, null);
+                tokenInformation = new TokenInformation(TokenType.PLUS, null, curIndex);
                 break;
             case '-':
-                tokenInformation = new TokenInformation(TokenType.MINUS, null);
+                tokenInformation = new TokenInformation(TokenType.MINUS, null, curIndex);
                 break;
             case '*':
-                tokenInformation = new TokenInformation(TokenType.MULTIPLE, null);
+                tokenInformation = new TokenInformation(TokenType.MULTIPLE, null, curIndex);
                 break;
             case '/':
-                tokenInformation = new TokenInformation(TokenType.DIVIDE, null);
+                tokenInformation = new TokenInformation(TokenType.DIVIDE, null, curIndex);
                 break;
             case '(':
-                tokenInformation = new TokenInformation(TokenType.LEFTBRACKET, null);
+                tokenInformation = new TokenInformation(TokenType.LEFTBRACKET, null, curIndex);
                 break;
             case ')':
-                tokenInformation = new TokenInformation(TokenType.RIGHTBRACKET, null);
+                tokenInformation = new TokenInformation(TokenType.RIGHTBRACKET, null, curIndex);
                 break;
         }
         lastIndex = curIndex;

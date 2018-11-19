@@ -61,7 +61,6 @@ public class Interface extends JFrame implements ActionListener
             }
             Parser parser = new Parser(tokenInformations);
             TreeNode root = parser.parser();
-            System.out.println(root);
     }
     public static void main(String[] args)
     {

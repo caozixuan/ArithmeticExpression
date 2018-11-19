@@ -1,3 +1,4 @@
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 import sun.reflect.generics.tree.Tree;
 
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ public class Parser {
         this.tokens = tokens;
     }
 
-    public TreeNode E(TreeNode node) {
+    public TreeNode E(TreeNode node) throws Exception{
         TreeNode curNode = new TreeNode("E",node);
         System.out.println("E->TE'");
         TreeNode TNode = T(curNode);
@@ -42,7 +43,7 @@ public class Parser {
         return null;
     }
 
-    public TreeNode E() {
+    public TreeNode E() throws Exception{
         TreeNode curNode = new TreeNode("E",null);
         System.out.println("E->TE'");
         TreeNode TNode = T(curNode);
@@ -58,7 +59,7 @@ public class Parser {
         return null;
     }
 
-    public TreeNode E2(TreeNode node) {
+    public TreeNode E2(TreeNode node) throws Exception{
         TreeNode curNode = new TreeNode("E'",node);
         if (tokens.get(curIndex).type == TokenType.PLUS || tokens.get(curIndex).type == TokenType.MINUS) {
             if (tokens.get(curIndex).type == TokenType.PLUS) {
@@ -89,7 +90,7 @@ public class Parser {
         return curNode;
     }
 
-    public TreeNode T(TreeNode node) {
+    public TreeNode T(TreeNode node) throws Exception{
         TreeNode curNode = new TreeNode("T",node);
         System.out.println("T->FT'");
         TreeNode FNode = F(curNode);
@@ -105,7 +106,7 @@ public class Parser {
         return null;
     }
 
-    public TreeNode T2(TreeNode node) {
+    public TreeNode T2(TreeNode node) throws Exception{
         TreeNode curNode = new TreeNode("T'",node);
         if (tokens.get(curIndex).type == TokenType.MULTIPLE || tokens.get(curIndex).type == TokenType.DIVIDE) {
             if (tokens.get(curIndex).type == TokenType.MULTIPLE) {
@@ -129,7 +130,6 @@ public class Parser {
                     return null;
                 }
                 return null;
-
             }
             return null;
         }
@@ -139,7 +139,7 @@ public class Parser {
         return curNode;
     }
 
-    public TreeNode F(TreeNode node) {
+    public TreeNode F(TreeNode node) throws Exception{
         TreeNode curNode = new TreeNode("F",node);
         if (tokens.get(curIndex).type == TokenType.LEFTBRACKET) {
             System.out.println("F->(E)");
@@ -159,6 +159,9 @@ public class Parser {
                             return curNode;
                         }
                     }
+                    String error_message = "Location " + (tokens.get(curIndex).index + 1) + " Error: Missing a right bracket.";
+                    throw new Exception(error_message);
+                    //System.out.println("Location " + (tokens.get(curIndex).index + 1) + " Error: Missing a right bracket.");
                 }
                 return null;
             }
@@ -167,11 +170,14 @@ public class Parser {
             System.out.println("F->i");
             TreeNode iNode = new TreeNode("i", curNode);
             curNode.addChild(iNode);
+            iNode.addChild(new TreeNode(tokens.get(curIndex).information,iNode));
             readNextToken();
             return curNode;
         }
-
-        return null;
+        String error_message = "Location " + (tokens.get(curIndex).index + 1) + " Error: wrong usage of operator.";
+        throw new Exception(error_message);
+        //System.out.println("Location " + (tokens.get(curIndex).index + 1) + " Error: wrong usage of operator.");
+        //return null;
     }
 
     public boolean readNextToken() {
@@ -185,8 +191,15 @@ public class Parser {
     }
 
     public TreeNode parser() {
-        TreeNode root =  E();
-        printTreeNode(root, 0);
+        TreeNode root = null;
+        try{
+            root =  E();
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+        if(root!=null){
+            printTreeNode(root, 0);
+        }
         return root;
     }
 
