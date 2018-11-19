@@ -121,7 +121,7 @@ public class Parser {
                 TreeNode FNode = F(curNode);
                 if (FNode != null) {
                     curNode.addChild(FNode);
-                    TreeNode T2Node = T(curNode);
+                    TreeNode T2Node = T2(curNode);
                     if (T2Node != null) {
                         curNode.addChild(T2Node);
                         return curNode;
@@ -186,7 +186,24 @@ public class Parser {
 
     public TreeNode parser() {
         TreeNode root =  E();
+        printTreeNode(root, 0);
         return root;
+    }
+
+    public void printTreeNode(TreeNode node, int level) {
+        String preStr = "";
+        for(int i = 0; i < level; i++) {
+            preStr += "     ";
+        }
+
+        for(int i = 0; i < node.children.size(); i++) {
+            TreeNode t = node.children.get(i);
+            System.out.println(preStr + "- " + t.curNode);
+
+            if(!t.children.isEmpty()) {
+                printTreeNode(t, level + 1);
+            }
+        }
     }
 
     
