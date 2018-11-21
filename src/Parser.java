@@ -22,6 +22,8 @@ class TreeNode {
 public class Parser {
     public ArrayList<TokenInformation> tokens;
     public int curIndex = 0;
+    public String productionStr = "";
+    public String treeStr = "";
 
     public Parser(ArrayList<TokenInformation> tokens) {
         this.tokens = tokens;
@@ -29,7 +31,7 @@ public class Parser {
 
     public TreeNode E(TreeNode node) throws Exception{
         TreeNode curNode = new TreeNode("E",node);
-        System.out.println("E->TE'");
+        productionStr += "E->TE'" + "\n";
         TreeNode TNode = T(curNode);
         if (TNode != null) {
             curNode.addChild(TNode);
@@ -45,13 +47,17 @@ public class Parser {
 
     public TreeNode E() throws Exception{
         TreeNode curNode = new TreeNode("E",null);
-        System.out.println("E->TE'");
+        productionStr += "E->TE'" + "\n";
         TreeNode TNode = T(curNode);
         if (TNode != null) {
             curNode.addChild(TNode);
             TreeNode E2Node = E2(curNode);
             if (E2Node != null) {
                 curNode.addChild(E2Node);
+                if(tokens.get(curIndex).type==TokenType.RIGHTBRACKET){
+                    String error_message = "Location " + (tokens.get(curIndex).index + 1) + " Error: Missing a left bracket.";
+                    throw new Exception(error_message);
+                }
                 return curNode;
             }
             return null;
@@ -63,13 +69,13 @@ public class Parser {
         TreeNode curNode = new TreeNode("E'",node);
         if (tokens.get(curIndex).type == TokenType.PLUS || tokens.get(curIndex).type == TokenType.MINUS) {
             if (tokens.get(curIndex).type == TokenType.PLUS) {
-                System.out.println("E'->+TE'");
+                productionStr += "E'->+TE'" + "\n";
                 TreeNode plusNode = new TreeNode("+", curNode);
                 curNode.addChild(plusNode);
             } else {
                 TreeNode plusNode = new TreeNode("-", curNode);
                 curNode.addChild(plusNode);
-                System.out.println("E'->-TE'");
+                productionStr += "E'->-TE'" + "\n";
             }
             readNextToken();
             TreeNode TNode = T(node);
@@ -84,7 +90,7 @@ public class Parser {
             }
             return null;
         }
-        System.out.println("E'->e");
+        productionStr += "E'->e" + "\n";
         TreeNode nullNode = new TreeNode("e", curNode);
         curNode.addChild(nullNode);
         return curNode;
@@ -92,7 +98,7 @@ public class Parser {
 
     public TreeNode T(TreeNode node) throws Exception{
         TreeNode curNode = new TreeNode("T",node);
-        System.out.println("T->FT'");
+        productionStr += "T->FT'" + "\n";
         TreeNode FNode = F(curNode);
         if (FNode != null) {
             curNode.addChild(FNode);
@@ -110,11 +116,11 @@ public class Parser {
         TreeNode curNode = new TreeNode("T'",node);
         if (tokens.get(curIndex).type == TokenType.MULTIPLE || tokens.get(curIndex).type == TokenType.DIVIDE) {
             if (tokens.get(curIndex).type == TokenType.MULTIPLE) {
-                System.out.println("T'->*FT'");
+                productionStr += "T'->*FT'" + "\n";
                 TreeNode plusNode = new TreeNode("*", curNode);
                 curNode.addChild(plusNode);
             } else {
-                System.out.println("T'->/FT'");
+                productionStr += "T'->/FT'" + "\n";
                 TreeNode plusNode = new TreeNode("/", curNode);
                 curNode.addChild(plusNode);
             }
@@ -133,7 +139,7 @@ public class Parser {
             }
             return null;
         }
-        System.out.println("T'->e");
+        productionStr += "T'->e" + "\n";
         TreeNode nullNode = new TreeNode("e", curNode);
         curNode.addChild(nullNode);
         return curNode;
@@ -142,7 +148,7 @@ public class Parser {
     public TreeNode F(TreeNode node) throws Exception{
         TreeNode curNode = new TreeNode("F",node);
         if (tokens.get(curIndex).type == TokenType.LEFTBRACKET) {
-            System.out.println("F->(E)");
+            productionStr += "F->(E)" + "\n";
             TreeNode leftBracketNode = new TreeNode("(", curNode);
             curNode.addChild(leftBracketNode);
             if (readNextToken()) {
@@ -167,7 +173,7 @@ public class Parser {
             }
         } else if (tokens.get(curIndex).type == TokenType.IDENTIFIER || tokens.get(curIndex).type == TokenType.INT
                 || tokens.get(curIndex).type == TokenType.DOUBLE) {
-            System.out.println("F->i");
+            productionStr += "F->i" + "\n";
             TreeNode iNode = new TreeNode("i", curNode);
             curNode.addChild(iNode);
             iNode.addChild(new TreeNode(tokens.get(curIndex).information,iNode));
@@ -196,9 +202,11 @@ public class Parser {
             root =  E();
         }catch (Exception e){
             System.out.println(e.getMessage());
+            productionStr += e.getMessage();
         }
         if(root!=null){
-            printTreeNode(root, 0);
+            treeStr += "- E\n";
+            printTreeNode(root, 1);
         }
         return root;
     }
@@ -211,7 +219,8 @@ public class Parser {
 
         for(int i = 0; i < node.children.size(); i++) {
             TreeNode t = node.children.get(i);
-            System.out.println(preStr + "- " + t.curNode);
+            treeStr += preStr + "- " + t.curNode + "\n";
+            // System.out.println(preStr + "- " + t.curNode);
 
             if(!t.children.isEmpty()) {
                 printTreeNode(t, level + 1);

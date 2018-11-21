@@ -26,5 +26,9 @@ a?3+2.2      // invalid character
 (1+1*3)-2
 (2.0/2+3.3)*1
 (2.0/a+3.3)*b
-2++3/3 //
-(2+1/3 //
+(1+1/2*(3/2))+1 //Ç¶Ì×À¨ºÅ
+2++3/3 // Location 3 Error: wrong usage of operator.
+(2+1/3 // Location 7 Error: Missing a right bracket.
+2+3/2)+2  //Location 6 Error: Missing a left bracket.
+1+1)   //Location 4 Error: Missing a left bracket.
+1+1i
